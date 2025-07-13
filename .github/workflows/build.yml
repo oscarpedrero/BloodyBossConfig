@@ -2,14 +2,15 @@ name: Build and Release
 
 on:
   push:
-    branches: [ main, master ]
     tags: [ 'v*' ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   build:
@@ -140,38 +141,52 @@ jobs:
       - name: Prepare release assets
         run: |
           mkdir -p release-assets
+          echo "Contents of release-artifacts:"
+          ls -la release-artifacts/
           
           # Create compressed packages
           for dir in release-artifacts/*/; do
             platform=$(basename "$dir")
-            echo "Processing $platform"
+            echo "Processing platform: $platform"
+            echo "Contents of $dir:"
+            ls -la "$dir"
             
             if [[ "$platform" == *"windows"* ]]; then
               # Windows: Create ZIP
               cd "$dir"
               if ls *.exe 1> /dev/null 2>&1; then
-                zip -r "../../release-assets/BloodyBossConfig-Windows-x64-${GITHUB_REF_NAME}.zip" *.exe *.msi *.dll || true
+                echo "Creating Windows ZIP..."
+                zip -r "../../release-assets/BloodyBossConfig-Windows-x64-${GITHUB_REF_NAME}.zip" * || true
+              else
+                echo "No .exe files found in $platform"
               fi
               cd - > /dev/null
             elif [[ "$platform" == *"linux"* ]]; then
               # Linux: Create TAR.GZ
               cd "$dir"
               if ls bloodyboss-config-linux 1> /dev/null 2>&1; then
-                tar -czf "../../release-assets/BloodyBossConfig-Linux-x64-${GITHUB_REF_NAME}.tar.gz" bloodyboss-config-linux *.deb *.AppImage || true
+                echo "Creating Linux TAR.GZ..."
+                tar -czf "../../release-assets/BloodyBossConfig-Linux-x64-${GITHUB_REF_NAME}.tar.gz" * || true
+              else
+                echo "No Linux executable found in $platform"
               fi
               cd - > /dev/null
             elif [[ "$platform" == *"macos"* ]]; then
-              # macOS: Create TAR.GZ for each architecture
+              # macOS: Create TAR.GZ
               cd "$dir"
               if ls bloodyboss-config-macos-* 1> /dev/null 2>&1; then
-                for file in bloodyboss-config-macos-*; do
-                  arch=$(echo "$file" | sed 's/bloodyboss-config-macos-//')
-                  tar -czf "../../release-assets/BloodyBossConfig-macOS-${arch}-${GITHUB_REF_NAME}.tar.gz" "$file" *.dmg *.app || true
-                done
+                echo "Creating macOS TAR.GZ for $platform..."
+                arch=$(echo "$platform" | sed 's/.*macos-//')
+                tar -czf "../../release-assets/BloodyBossConfig-macOS-${arch}-${GITHUB_REF_NAME}.tar.gz" * || true
+              else
+                echo "No macOS executable found in $platform"
               fi
               cd - > /dev/null
             fi
           done
+          
+          echo "Final release assets:"
+          ls -la release-assets/
 
       - name: Check if release exists
         id: check_release
