@@ -1,0 +1,84 @@
+name: Publish to Thunderstore
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        required: true
+        description: The tag to release (e.g., v1.0.0)
+        type: string
+
+jobs:
+  publish_thunderstore:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.tag_name || github.event.release.tag_name }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Install tcli
+        run: dotnet tool install --global tcli
+
+      - name: Download Release Assets
+        run: |
+          echo "Downloading release assets for tag: $RELEASE_TAG"
+          gh release download $RELEASE_TAG -D ./release-assets --pattern "*.zip" --pattern "*.tar.gz"
+          echo "Downloaded files:"
+          ls -la ./release-assets/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update version in configs
+        run: |
+          # Extract version without 'v' prefix
+          VERSION=${RELEASE_TAG#v}
+          echo "Setting version to: $VERSION"
+          
+          # Update thunderstore.toml
+          sed -i "s/versionNumber = \".*\"/versionNumber = \"$VERSION\"/" thunderstore.toml
+          
+          # Update manifest.json
+          sed -i "s/\"version_number\": \".*\"/\"version_number\": \"$VERSION\"/" manifest.json
+          
+          echo "Updated thunderstore.toml:"
+          cat thunderstore.toml | grep versionNumber
+          echo "Updated manifest.json:"
+          cat manifest.json | grep version_number
+
+      - name: Build Thunderstore package
+        run: |
+          # tcli will use thunderstore.toml to build the package
+          tcli build
+          
+          echo "Built package contents:"
+          ls -la ./build/
+
+      - name: Publish to Thunderstore
+        run: |
+          # Extract version without 'v' prefix
+          VERSION=${RELEASE_TAG#v}
+          
+          # Publish the package
+          tcli publish --token ${{ secrets.THUNDERSTORE_KEY }}
+          
+          echo "✅ Successfully published BloodyBossConfig v$VERSION to Thunderstore!"
+        env:
+          TCLI_AUTH_TOKEN: ${{ secrets.THUNDERSTORE_KEY }}
+
+      - name: Upload Thunderstore package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: thunderstore-package-${{ env.RELEASE_TAG }}
+          path: ./build/*.zip
+          retention-days: 30

@@ -1,0 +1,27 @@
+[config]
+schemaVersion = "0.0.1"
+
+[package]
+namespace = "Trodi"
+name = "BloodyBossConfig"
+versionNumber = "1.0.0"
+description = "A modern, cross-platform desktop configuration tool for the BloodyBoss V Rising mod. Features visual boss editor, item selector, and complete configuration management."
+websiteUrl = "https://github.com/oscarpedrero/BloodyBossConfig"
+containsNsfwContent = false
+
+[package.dependencies]
+
+[build]
+icon = "./icon.png"
+readme = "./README-THUNDERSTORE.md"
+outdir = "./build"
+
+[[build.copy]]
+source = "./release-assets"
+target = ""
+
+[publish]
+communities = ["v-rising"]
+repository = "https://thunderstore.io"
+[publish.categories]
+v-rising = ["tools", "mods"]

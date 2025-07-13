@@ -1,0 +1,7 @@
+{
+  "name": "BloodyBossConfig",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/oscarpedrero/BloodyBossConfig",
+  "description": "A modern, cross-platform desktop configuration tool for the BloodyBoss V Rising mod. Features visual boss editor, item selector, and complete configuration management.",
+  "dependencies": []
+}

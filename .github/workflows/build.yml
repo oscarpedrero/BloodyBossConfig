@@ -236,6 +236,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Trigger Thunderstore publish
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          echo "Release created successfully. Thunderstore publish will be triggered by the release event."
+          
       - name: Update existing release
         if: steps.check_release.outputs.exists == 'true'
         run: |
