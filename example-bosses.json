@@ -1,0 +1,113 @@
+[
+  {
+    "name": "Ancient Vampire Lord",
+    "prefabGuid": "CHAR_Cursed_VampireLord_VBlood",
+    "level": 80,
+    "multiplier": 2.5,
+    "location": {
+      "x": -1234.56,
+      "y": 10.0,
+      "z": 5678.90
+    },
+    "spawnType": "world",
+    "lifeTime": 3600,
+    "immuneToSun": true,
+    "immuneToHolyArea": false,
+    "mechanics": [
+      {
+        "id": "stun_mechanic_1",
+        "type": "stun",
+        "enabled": true,
+        "trigger": {
+          "type": "timer",
+          "value": 30,
+          "repeat": true
+        },
+        "parameters": {
+          "target": "random",
+          "duration": 3,
+          "markDuration": 2,
+          "announcement": "Prepare to be stunned!"
+        }
+      },
+      {
+        "id": "aoe_mechanic_1",
+        "type": "aoe",
+        "enabled": true,
+        "trigger": {
+          "type": "hp_threshold",
+          "value": 75
+        },
+        "parameters": {
+          "type": "fire",
+          "pattern": "ring",
+          "damage": 50,
+          "radius": 10,
+          "duration": 5,
+          "telegraphDuration": 2
+        }
+      }
+    ],
+    "phases": [
+      {
+        "name": "Enraged",
+        "hpThreshold": 50,
+        "mechanics": ["aoe_mechanic_1"],
+        "modifiers": {
+          "damageMultiplier": 1.5,
+          "speedMultiplier": 1.2
+        }
+      }
+    ],
+    "rewards": [
+      {
+        "prefabGuid": "Item_Ingredient_BloodEssence_Source",
+        "quantity": 10,
+        "chance": 100
+      },
+      {
+        "prefabGuid": "Item_Jewel_SoulShard_Solarus",
+        "quantity": 1,
+        "chance": 25
+      }
+    ]
+  },
+  {
+    "name": "Frost Giant King",
+    "prefabGuid": "CHAR_Wendigo_VBlood",
+    "level": 65,
+    "multiplier": 2.0,
+    "location": {
+      "x": 2345.67,
+      "y": 50.0,
+      "z": -3456.78
+    },
+    "spawnType": "scheduled",
+    "immuneToSun": false,
+    "immuneToHolyArea": false,
+    "mechanics": [
+      {
+        "id": "slow_mechanic_1",
+        "type": "slow",
+        "enabled": true,
+        "trigger": {
+          "type": "timer",
+          "value": 45,
+          "repeat": true,
+          "cooldown": 30
+        },
+        "parameters": {
+          "radius": 15,
+          "duration": 10,
+          "slowAmount": 0.5,
+          "energyDrain": 2,
+          "minPlayers": 2
+        }
+      }
+    ],
+    "schedule": {
+      "days": ["Monday", "Wednesday", "Friday"],
+      "times": ["20:00", "22:00"]
+    }
+  }
+]

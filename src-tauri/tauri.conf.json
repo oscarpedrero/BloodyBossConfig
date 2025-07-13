@@ -1,0 +1,46 @@
+{
+  "productName": "BloodyBoss Config",
+  "version": "0.1.0",
+  "identifier": "com.trodi.bloodyboss-config",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "BloodyBoss Configuration Tool",
+        "width": 1200,
+        "height": 800,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "plugins": {},
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "msi"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": [],
+    "shortDescription": "Configuration tool for BloodyBoss V Rising mod",
+    "longDescription": "A visual configuration tool for managing bosses, mechanics and settings in the BloodyBoss mod for V Rising.",
+    "publisher": "trodi",
+    "copyright": "© 2025 trodi",
+    "category": "Productivity",
+    "homepage": "https://github.com/trodi/BloodyBoss-Config",
+    "license": "MIT"
+  }
+}

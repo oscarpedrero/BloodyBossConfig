@@ -1,0 +1,92 @@
+name: Create Release from Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force update existing release'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  create-version-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      tag_exists: ${{ steps.check_tag.outputs.exists }}
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get version from package.json
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "raw_version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Found version: v$VERSION"
+
+      - name: Update Cargo.toml version
+        run: |
+          RAW_VERSION=$(node -p "require('./package.json').version")
+          sed -i "s/^version = .*/version = \"$RAW_VERSION\"/" src-tauri/Cargo.toml
+          echo "Updated Cargo.toml to version $RAW_VERSION"
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git tag --list | grep -q "^${{ steps.get_version.outputs.version }}$"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag ${{ steps.get_version.outputs.version }} already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag ${{ steps.get_version.outputs.version }} does not exist"
+          fi
+
+      - name: Create and push tag
+        if: steps.check_tag.outputs.exists == 'false' || github.event.inputs.force_update == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          if [[ "${{ steps.check_tag.outputs.exists }}" == "true" ]]; then
+            echo "Force updating tag ${{ steps.get_version.outputs.version }}"
+            git tag -d ${{ steps.get_version.outputs.version }} || true
+            git push origin --delete ${{ steps.get_version.outputs.version }} || true
+          fi
+          
+          # Commit version sync if needed
+          if ! git diff --quiet; then
+            git add src-tauri/Cargo.toml
+            git commit -m "chore: sync Cargo.toml version to ${{ steps.get_version.outputs.raw_version }}"
+            git push
+          fi
+          
+          git tag ${{ steps.get_version.outputs.version }}
+          git push origin ${{ steps.get_version.outputs.version }}
+          echo "Created and pushed tag: ${{ steps.get_version.outputs.version }}"
+
+      - name: Tag already exists
+        if: steps.check_tag.outputs.exists == 'true' && github.event.inputs.force_update != 'true'
+        run: |
+          echo "❌ Tag ${{ steps.get_version.outputs.version }} already exists!"
+          echo "   Either:"
+          echo "   1. Update the version in package.json"
+          echo "   2. Run this workflow with 'force_update' checked"
+          echo "   3. Delete the existing tag and release manually"
+          exit 1
+
+  wait-for-build:
+    needs: create-version-tag
+    if: needs.create-version-tag.outputs.tag_exists == 'false' || github.event.inputs.force_update == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Wait for build workflow to complete
+        run: |
+          echo "✅ Tag ${{ needs.create-version-tag.outputs.version }} created successfully!"
+          echo "🔄 The build workflow should automatically start now."
+          echo "📦 Release will be created when builds complete."
+          echo "🔗 Check the Actions tab to monitor progress."
