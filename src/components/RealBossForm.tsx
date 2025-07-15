@@ -201,7 +201,7 @@ export function RealBossForm({ boss, onSubmit, onCancel }: RealBossFormProps) {
     onSubmit(finalData as BossEncounter)
   }
 
-  const handlePrefabSelect = (prefabGuid: number, name: string, assetName: string) => {
+  const handlePrefabSelect = (prefabGuid: number, _name: string, assetName: string) => {
     // Verificar si hay habilidades configuradas antes de cambiar
     const hasConfiguredAbilities = watchedAbilitySwaps && Object.keys(watchedAbilitySwaps).length > 0
     
