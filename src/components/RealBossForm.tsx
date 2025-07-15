@@ -223,8 +223,8 @@ export function RealBossForm({ boss, onSubmit, onCancel }: RealBossFormProps) {
     setValue('PrefabGUID', prefabGuid)
     setValue('AssetName', assetName)
     
-    // Auto-generar nameHash basado en el nombre
-    setValue('nameHash', Math.abs(name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)).toString())
+    // Auto-generar nameHash usando GUID para evitar colisiones
+    setValue('nameHash', crypto.randomUUID().replace(/-/g, ''))
     
     // Obtener información del VBlood seleccionado
     const vblood = VBLOOD_DATABASE.find((v: any) => v.prefabGuid === prefabGuid)

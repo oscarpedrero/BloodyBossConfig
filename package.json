@@ -1,6 +1,6 @@
 {
   "name": "bloodybossconfig",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Configuration tool for BloodyBoss V Rising mod",
   "main": "index.js",
   "scripts": {
