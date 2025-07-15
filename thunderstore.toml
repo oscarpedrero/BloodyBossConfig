@@ -4,7 +4,7 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "Trodi"
 name = "BloodyBossConfig"
-versionNumber = "1.0.1"
+versionNumber = "1.0.2"
 description = "A modern, cross-platform desktop configuration tool for the BloodyBoss V Rising mod. Features visual boss editor, item selector, and complete configuration management."
 websiteUrl = "https://github.com/oscarpedrero/BloodyBossConfig"
 containsNsfwContent = false
